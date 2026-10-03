@@ -1,0 +1,81 @@
+(globalThis.TURBOPACK || (globalThis.TURBOPACK = [])).push(["object" == typeof document ? document.currentScript : void 0, 5998, 59292, e => {
+    "use strict";
+    e.i(47167);
+    var r = e.i(43476)
+      , t = e.i(71645);
+    let n = "0x4AAAAAADZoiZv9yxVQlso4"
+      , l = null
+      , c = (0,
+    t.forwardRef)(function({onVerify: e, onExpire: c, onError: i, className: o}, u) {
+        let s = (0,
+        t.useRef)(null)
+          , a = (0,
+        t.useRef)(null)
+          , d = (0,
+        t.useRef)({
+            onVerify: e,
+            onExpire: c,
+            onError: i
+        });
+        return d.current = {
+            onVerify: e,
+            onExpire: c,
+            onError: i
+        },
+        (0,
+        t.useImperativeHandle)(u, () => ({
+            reset() {
+                a.current && window.turnstile && window.turnstile.reset(a.current)
+            }
+        })),
+        (0,
+        t.useEffect)( () => {
+            let e = !1;
+            return (window.turnstile ? Promise.resolve() : l || (l = new Promise( (e, r) => {
+                let t = document.createElement("script");
+                t.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
+                t.async = !0,
+                t.defer = !0,
+                t.onload = () => e(),
+                t.onerror = () => {
+                    l = null,
+                    r(Error("Failed to load Turnstile."))
+                }
+                ,
+                document.head.appendChild(t)
+            }
+            ))).then( () => {
+                !e && s.current && window.turnstile && (a.current = window.turnstile.render(s.current, {
+                    sitekey: n,
+                    theme: "u" < typeof document ? "light" : document.documentElement.classList.contains("dark") ? "dark" : "light",
+                    appearance: "interaction-only",
+                    callback: e => d.current.onVerify(e),
+                    "expired-callback": () => d.current.onExpire?.(),
+                    "error-callback": () => d.current.onError?.()
+                }))
+            }
+            ).catch( () => {
+                e || d.current.onError?.()
+            }
+            ),
+            () => {
+                if (e = !0,
+                a.current && window.turnstile) {
+                    try {
+                        window.turnstile.remove(a.current)
+                    } catch {}
+                    a.current = null
+                }
+            }
+        }
+        , []),
+        (0,
+        r.jsx)("div", {
+            ref: s,
+            className: o
+        })
+    });
+    e.s(["TURNSTILE_ENABLED", 0, !!n, "Turnstile", 0, c], 5998),
+    e.s(["HONEYPOT_FIELD", 0, "company_website"], 59292)
+}
+]);
