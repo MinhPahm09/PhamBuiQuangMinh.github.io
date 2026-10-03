@@ -1,0 +1,371 @@
+(globalThis.TURBOPACK || (globalThis.TURBOPACK = [])).push(["object" == typeof document ? document.currentScript : void 0, 5998, 59292, e => {
+    "use strict";
+    e.i(47167);
+    var a = e.i(43476)
+      , t = e.i(71645);
+    let r = "0x4AAAAAADZoiZv9yxVQlso4"
+      , n = null
+      , s = (0,
+    t.forwardRef)(function({onVerify: e, onExpire: s, onError: l, className: i}, o) {
+        let m = (0,
+        t.useRef)(null)
+          , c = (0,
+        t.useRef)(null)
+          , u = (0,
+        t.useRef)({
+            onVerify: e,
+            onExpire: s,
+            onError: l
+        });
+        return u.current = {
+            onVerify: e,
+            onExpire: s,
+            onError: l
+        },
+        (0,
+        t.useImperativeHandle)(o, () => ({
+            reset() {
+                c.current && window.turnstile && window.turnstile.reset(c.current)
+            }
+        })),
+        (0,
+        t.useEffect)( () => {
+            let e = !1;
+            return (window.turnstile ? Promise.resolve() : n || (n = new Promise( (e, a) => {
+                let t = document.createElement("script");
+                t.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
+                t.async = !0,
+                t.defer = !0,
+                t.onload = () => e(),
+                t.onerror = () => {
+                    n = null,
+                    a(Error("Failed to load Turnstile."))
+                }
+                ,
+                document.head.appendChild(t)
+            }
+            ))).then( () => {
+                !e && m.current && window.turnstile && (c.current = window.turnstile.render(m.current, {
+                    sitekey: r,
+                    theme: "u" < typeof document ? "light" : document.documentElement.classList.contains("dark") ? "dark" : "light",
+                    appearance: "interaction-only",
+                    callback: e => u.current.onVerify(e),
+                    "expired-callback": () => u.current.onExpire?.(),
+                    "error-callback": () => u.current.onError?.()
+                }))
+            }
+            ).catch( () => {
+                e || u.current.onError?.()
+            }
+            ),
+            () => {
+                if (e = !0,
+                c.current && window.turnstile) {
+                    try {
+                        window.turnstile.remove(c.current)
+                    } catch {}
+                    c.current = null
+                }
+            }
+        }
+        , []),
+        (0,
+        a.jsx)("div", {
+            ref: m,
+            className: i
+        })
+    });
+    e.s(["TURNSTILE_ENABLED", 0, !!r, "Turnstile", 0, s], 5998),
+    e.s(["HONEYPOT_FIELD", 0, "company_website"], 59292)
+}
+, 55944, e => {
+    "use strict";
+    var a = e.i(43476)
+      , t = e.i(71645)
+      , r = e.i(70854)
+      , n = e.i(5998)
+      , s = e.i(59292);
+    let l = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      , i = {
+        name: "",
+        email: "",
+        message: ""
+    }
+      , o = {
+        name: !0,
+        email: !0,
+        message: !0
+    };
+    function m(e) {
+        let a = {}
+          , t = e.name.trim()
+          , r = e.email.trim()
+          , n = e.message.trim();
+        return t ? t.length < 2 && (a.name = "Name is too short.") : a.name = "Please enter your name.",
+        r ? l.test(r) || (a.email = "Please enter a valid email address.") : a.email = "Please enter your email.",
+        n ? n.length < 10 ? a.message = "Add a bit more detail (10+ characters)." : n.length > 2e3 && (a.message = "Message is too long (max 2000 characters).") : a.message = "Please write a short message.",
+        a
+    }
+    e.s(["ContactForm", 0, function() {
+        let[e,l] = (0,
+        t.useState)(i)
+          , [c,u] = (0,
+        t.useState)({})
+          , [d,p] = (0,
+        t.useState)({})
+          , [h,x] = (0,
+        t.useState)("idle")
+          , [g,f] = (0,
+        t.useState)(null)
+          , [b,y] = (0,
+        t.useState)(null)
+          , [w,j] = (0,
+        t.useState)(null)
+          , [v,N] = (0,
+        t.useState)(null)
+          , E = (0,
+        t.useRef)(null)
+          , k = e => !!(d[e] && c[e])
+          , T = a => t => {
+            let r = {
+                ...e,
+                [a]: t.target.value
+            };
+            l(r),
+            d[a] && u(m(r)),
+            "error" === h && (x("idle"),
+            f(null))
+        }
+          , S = a => () => {
+            y(null),
+            p(e => ({
+                ...e,
+                [a]: !0
+            })),
+            u(m(e))
+        }
+          , P = async a => {
+            a.preventDefault();
+            let t = a.currentTarget
+              , r = m(e);
+            if (Object.keys(r).length > 0) {
+                u(r),
+                p(o);
+                return
+            }
+            if (n.TURNSTILE_ENABLED && !w)
+                return void N("Please complete the captcha below.");
+            x("sending"),
+            u({}),
+            f(null),
+            N(null);
+            try {
+                let a = await fetch("/api/contact", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: e.name.trim(),
+                        email: e.email.trim(),
+                        message: e.message.trim(),
+                        turnstileToken: w
+                    })
+                })
+                  , r = await a.json().catch( () => null);
+                if (!a.ok || !r?.ok) {
+                    x("error"),
+                    f(r?.error ?? "Something went wrong. Please try again."),
+                    E.current?.reset(),
+                    j(null);
+                    return
+                }
+                x("sent"),
+                t.reset(),
+                l(i),
+                p({}),
+                E.current?.reset(),
+                j(null),
+                setTimeout( () => x("idle"), 3500)
+            } catch {
+                x("error"),
+                f("Network error. Please check your connection and try again."),
+                E.current?.reset(),
+                j(null)
+            }
+        }
+          , A = e => `w-full border-0 border-b bg-transparent px-0 py-3 font-body text-base text-on-background outline-none transition-colors placeholder:text-on-surface-variant/50 ${k(e) ? "border-[#f85149] focus:border-[#f85149]" : "border-primary focus:border-accent"}`
+          , C = e => `block pb-3 font-mono text-[11px] uppercase tracking-[0.3em] transition-all duration-300 ${b === e ? "translate-x-1 text-accent" : k(e) ? "text-[#f85149]" : "text-primary"}`
+          , F = "mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#f85149]";
+        return (0,
+        a.jsxs)("form", {
+            onSubmit: P,
+            className: "space-y-8",
+            noValidate: !0,
+            children: [(0,
+            a.jsxs)("div", {
+                "aria-hidden": "true",
+                className: "h-0 w-0 overflow-hidden",
+                style: {
+                    position: "absolute",
+                    left: "-9999px"
+                },
+                children: [(0,
+                a.jsx)("label", {
+                    htmlFor: s.HONEYPOT_FIELD,
+                    children: "Company website"
+                }), (0,
+                a.jsx)("input", {
+                    id: s.HONEYPOT_FIELD,
+                    name: s.HONEYPOT_FIELD,
+                    type: "text",
+                    tabIndex: -1,
+                    autoComplete: "off"
+                })]
+            }), (0,
+            a.jsxs)("div", {
+                children: [(0,
+                a.jsx)("label", {
+                    htmlFor: "name",
+                    className: C("name"),
+                    children: "Name"
+                }), (0,
+                a.jsx)("input", {
+                    id: "name",
+                    name: "name",
+                    type: "text",
+                    required: !0,
+                    autoComplete: "name",
+                    placeholder: "John Doe",
+                    value: e.name,
+                    onChange: T("name"),
+                    onFocus: () => y("name"),
+                    onBlur: S("name"),
+                    "aria-invalid": k("name"),
+                    "aria-describedby": k("name") ? "name-error" : void 0,
+                    className: A("name")
+                }), k("name") && (0,
+                a.jsx)("p", {
+                    id: "name-error",
+                    className: F,
+                    children: c.name
+                })]
+            }), (0,
+            a.jsxs)("div", {
+                children: [(0,
+                a.jsx)("label", {
+                    htmlFor: "email",
+                    className: C("email"),
+                    children: "Email Address"
+                }), (0,
+                a.jsx)("input", {
+                    id: "email",
+                    name: "email",
+                    type: "email",
+                    required: !0,
+                    autoComplete: "email",
+                    placeholder: "john@example.com",
+                    value: e.email,
+                    onChange: T("email"),
+                    onFocus: () => y("email"),
+                    onBlur: S("email"),
+                    "aria-invalid": k("email"),
+                    "aria-describedby": k("email") ? "email-error" : void 0,
+                    className: A("email")
+                }), k("email") && (0,
+                a.jsx)("p", {
+                    id: "email-error",
+                    className: F,
+                    children: c.email
+                })]
+            }), (0,
+            a.jsxs)("div", {
+                children: [(0,
+                a.jsx)("label", {
+                    htmlFor: "message",
+                    className: C("message"),
+                    children: "Message"
+                }), (0,
+                a.jsx)("textarea", {
+                    id: "message",
+                    name: "message",
+                    rows: 4,
+                    required: !0,
+                    maxLength: 2e3,
+                    placeholder: "How can I help?",
+                    value: e.message,
+                    onChange: T("message"),
+                    onFocus: () => y("message"),
+                    onBlur: S("message"),
+                    "aria-invalid": k("message"),
+                    "aria-describedby": k("message") ? "message-error" : "message-count",
+                    className: `${A("message")} resize-none`
+                }), (0,
+                a.jsxs)("div", {
+                    className: "mt-2 flex items-start justify-between gap-3",
+                    children: [k("message") ? (0,
+                    a.jsx)("p", {
+                        id: "message-error",
+                        className: `${F} mt-0`,
+                        children: c.message
+                    }) : (0,
+                    a.jsx)("span", {}), (0,
+                    a.jsxs)("span", {
+                        id: "message-count",
+                        className: "shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-on-surface-variant/80",
+                        children: [e.message.length, "/", 2e3]
+                    })]
+                })]
+            }), "error" === h && g && (0,
+            a.jsx)("div", {
+                role: "alert",
+                className: "border border-[#f85149]/40 bg-[#f85149]/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-[#f85149]",
+                children: g
+            }), n.TURNSTILE_ENABLED && (0,
+            a.jsxs)("div", {
+                children: [(0,
+                a.jsx)(n.Turnstile, {
+                    ref: E,
+                    onVerify: e => {
+                        j(e),
+                        N(null)
+                    }
+                    ,
+                    onExpire: () => j(null),
+                    onError: () => {
+                        j(null),
+                        N("Captcha failed to load. Please retry.")
+                    }
+                }), v && (0,
+                a.jsx)("p", {
+                    className: "mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#f85149]",
+                    children: v
+                })]
+            }), (0,
+            a.jsxs)("button", {
+                type: "submit",
+                disabled: "sending" === h,
+                className: "group inline-flex w-full items-center justify-between gap-4 bg-primary px-8 py-4 text-on-primary transition-all duration-300 hover:bg-accent disabled:opacity-60 md:w-auto md:min-w-[260px]",
+                children: [(0,
+                a.jsx)("span", {
+                    className: "font-mono text-[11px] uppercase tracking-[0.3em]",
+                    children: "sending" === h ? "Sending…" : "sent" === h ? "Sent — Thank you" : "error" === h ? "Try Again" : "Send Message"
+                }), (0,
+                a.jsx)("span", {
+                    className: "block h-4 w-4 transition-transform duration-300 group-hover:translate-x-1",
+                    children: (0,
+                    a.jsx)(r.Icon, {
+                        name: "arrow-right"
+                    })
+                })]
+            }), (0,
+            a.jsx)("p", {
+                "aria-live": "polite",
+                className: `font-mono text-[11px] uppercase tracking-[0.3em] transition-opacity duration-300 ${"sent" === h ? "text-accent opacity-100" : "opacity-0"}`,
+                children: "Message received. I'll get back to you within 24 hours."
+            })]
+        })
+    }
+    ])
+}
+]);
